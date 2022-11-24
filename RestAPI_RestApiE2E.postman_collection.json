@@ -1,0 +1,554 @@
+{
+	"info": {
+		"_postman_id": "a336859e-c8f7-408b-96ca-4e758ebce917",
+		"name": "RestAPI_RestApiE2E",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18756796"
+	},
+	"item": [
+		{
+			"name": "E2E",
+			"item": [
+				{
+					"name": "Student Signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"RandomFirstName\", pm.variables.replaceIn(\"{{$randomFirstName}}\"));",
+									"",
+									"pm.environment.set(\"RandomLastName\", pm.variables.replaceIn(\"{{$randomLastName}}\"));",
+									"",
+									"pm.environment.set(\"RandomEmail\", pm.variables.replaceIn(\"{{$randomEmail}}\"));",
+									"",
+									"pm.environment.set(\"RandomYear\",_.random(1935,2013));",
+									"",
+									"pm.environment.set(\"RandomMonth\",_.random(1,12));",
+									"",
+									"pm.environment.set(\"RandomDay\",_.random(1,28));",
+									"",
+									"const GenderList=[\"male\", \"female\"]",
+									"var gender=Math.floor(Math.random()* GenderList.length);",
+									"pm.environment.set(\"RandomGender\", GenderList[gender]);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const respData= pm.response.json();",
+									"pm.test(\"verify response code is 201\", function(){",
+									"pm.response.to.have.status(201)",
+									"});",
+									"",
+									"pm.test(\"Verify success message is true when student signup\", function(){",
+									"pm.expect(respData.success).to.be.eql(true)",
+									"});",
+									"",
+									"pm.test(\"Verify message Registration Success when student signup\", function(){",
+									"pm.expect(respData.message).to.be.eql(\"Registration Success\")",
+									"});",
+									"",
+									"pm.environment.set(\"RandomId\", respData.id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\" : \"{{RandomFirstName}}\",\n    \"lastName\" : \"{{RandomLastName}}\",\n    \"email\"     : \"{{RandomEmail}}\",\n    \"password\"  : \"123456\",\n    \"confirmPassword\"  : \"123456\",\n    \"dob\"       : {\n        \"year\"      : {{RandomYear}},\n        \"month\"     :{{RandomMonth}},\n        \"day\"       : {{RandomDay}}\n    },\n    \"gender\"    : \"{{RandomGender}}\",\n    \"agree\"     : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}signup",
+							"host": [
+								"{{baseURL}}signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa is login\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify response status is 200 \", function () {",
+									"    pm.expect(resData.status).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify response  body has status properties\", function () {",
+									"    pm.expect(resData).to.have.property(\"status\");",
+									"});",
+									"",
+									"pm.test(\"Verify message is student found\", function () {",
+									"    pm.expect(resData.message).to.be.eql(\"Student Found\");",
+									"});",
+									"",
+									"pm.test(\"Verify user first name is correct\", function () {",
+									"    pm.expect(resData.data.firstName).to.be.eql(pm.environment.get(\"RandomFirstName\"));",
+									"});",
+									"",
+									"pm.test(\"Verify user last name is correct\", function () {",
+									"    pm.expect(resData.data.lastName).to.be.eql(pm.environment.get(\"RandomLastName\"));",
+									"});",
+									"",
+									"pm.test(\"Verify user studentId is correct\", function () {",
+									"    pm.expect(resData.data.studentId).to.be.eql(pm.environment.get(\"RandomId\"));",
+									"});",
+									"",
+									"pm.test(\"Verify user email is correct\", function () {",
+									"    pm.expect(resData.data.email).to.be.eql(pm.environment.get(\"RandomEmail\"));",
+									"});",
+									"",
+									"",
+									"pm.test(\"Verify user gender is present\", function () {",
+									"    pm.expect(resData.data.gender).to.be.eql(pm.environment.get(\"RandomGender\"));",
+									"});",
+									"let dobyear;",
+									"let dobmonth;",
+									"let dobday;",
+									"pm.test(\"To verify the DOB is correct\",function(){",
+									"    if(pm.environment.get(\"RandomYear\")){",
+									"        dobyear=pm.environment.get(\"RandomYear\")",
+									"}",
+									"if(pm.environment.get(\"RandomMonth\")<10){",
+									"  dobmonth=\"0\"+pm.environment.get(\"RandomMonth\")",
+									"}else{",
+									"dobmonth=pm.environment.get(\"RandomMonth\")",
+									"}",
+									"if(pm.environment.get(\"RandomDay\")<10){",
+									"    dobday=\"0\"+pm.environment.get(\"RandomDay\")",
+									"}else{",
+									"  dobday=pm.environment.get(\"RandomDay\")  ",
+									"}",
+									"pm.expect(resData.data.dob).to.be.eql(dobyear+\"-\"+dobmonth+\"-\"+dobday);",
+									"",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}student/{{RandomId}}",
+							"host": [
+								"{{baseURL}}student"
+							],
+							"path": [
+								"{{RandomId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StudentLogin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const qaData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa is login\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify success is true after qa login\",function(){",
+									"pm.expect(qaData.success).to.be.eql(true)",
+									"});",
+									"",
+									"pm.test(\"Verify display message registeration success\",function(){",
+									"    pm.expect(qaData.message).to.be.eql(\"Login Success\")",
+									"});",
+									"",
+									"pm.test(\"Verify token display when qa  login\",function(){",
+									"pm.expect(qaData).to.have.property(\"token\")",
+									"});",
+									"",
+									"pm.environment.set(\"qatoken\",qaData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"{{RandomEmail}}\",\n    \"password\" : \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}login",
+							"host": [
+								"{{baseURL}}login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateStudent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa update\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify is true after qa updte success\",function(){",
+									"pm.expect(resData.success).to.be.eql(true)",
+									"});",
+									"",
+									"pm.test(\"Verify display update success\",function(){",
+									"    pm.expect(resData.message).to.be.eql(\"Update success\")",
+									"    });",
+									"",
+									"    "
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"RandomFirstName\", pm.variables.replaceIn(\"{{$randomFirstName}}\"));",
+									"",
+									"pm.environment.set(\"RandomLastName\", pm.variables.replaceIn(\"{{$randomLastName}}\"));",
+									"",
+									"pm.environment.set(\"RandomEmail\", pm.variables.replaceIn(\"{{$randomEmail}}\"));",
+									"",
+									"pm.environment.set(\"RandomYear\",_.random(1935,2013));",
+									"",
+									"pm.environment.set(\"RandomMonth\",_.random(1,12));",
+									"",
+									"pm.environment.set(\"RandomDay\",_.random(1,28));",
+									"",
+									"const GenderList=[\"male\", \"female\"]",
+									"var gender=Math.floor(Math.random()* GenderList.length);",
+									"pm.environment.set(\"RandomGender\", GenderList[gender]);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{qatoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\" : \"{{RandomFirstName}}\",\n    \"lastName\" : \"{{RandomLastName}}\",\n    \"email\"     : \"{{RandomEmail}}\",\n    \"dob\"       : {\n        \"year\"      : {{RandomYear}},\n        \"month\"     :{{RandomMonth}},\n        \"day\"       : {{RandomDay}}\n    },\n    \"gender\"    : \"{{RandomGender}}\",\n    \"agree\"     : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}student/{{RandomId}}",
+							"host": [
+								"{{baseURL}}student"
+							],
+							"path": [
+								"{{RandomId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePassword",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa is signup\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify success is true after qa update password\",function(){",
+									"pm.expect(resData.success).to.be.eql(true)",
+									"});",
+									"",
+									"pm.test(\"Verify displayPassword update success\",function(){",
+									"    pm.expect(resData.message).to.be.eql(\"Password update success\")",
+									"    });",
+									"",
+									"    "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{qatoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"password\"  : \"Update12345\",\n    \"confirmPassword\"  : \"Update12345\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}updatePassword/{{RandomId}}",
+							"host": [
+								"{{baseURL}}updatePassword"
+							],
+							"path": [
+								"{{RandomId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify qa after passwod update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const resData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa is found\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify status is 200 when qa is found \",function(){",
+									"pm.expect(resData.status).to.be.eql(200)",
+									"});",
+									"",
+									"pm.test(\"Verify display student is found \",function(){",
+									"pm.expect(resData.message).to.be.eql(\"Student Found\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}student/{{RandomId}}",
+							"host": [
+								"{{baseURL}}student"
+							],
+							"path": [
+								"{{RandomId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RemoveStudent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const qaData= pm.response.json();",
+									"pm.test(\"Verify response code is 200 when qa is deleted\", function () {",
+									"    pm.expect(pm.response.code).to.be.eql(200);",
+									"});",
+									"",
+									"pm.test(\"Verify success is true when qa is deleted \",function(){",
+									"pm.expect(qaData.success).to.be.eql(true)",
+									"});",
+									"",
+									"pm.test(\"Verify display message student is deleted  \",function(){",
+									"pm.expect(qaData.messages).to.be.eql(\"Data Deleted\")",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{qatoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}student/{{RandomId}}",
+							"host": [
+								"{{baseURL}}student"
+							],
+							"path": [
+								"{{RandomId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "List of all Students",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const resData = pm.response.json();",
+							"pm.test(\"verify status code is 200\", function(){",
+							"pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Verify response status is 200 \", function () {",
+							"    pm.expect(resData.status).to.be.eql(200);",
+							"});",
+							"",
+							"pm.test(\"Verify response  body has status properties\", function () {",
+							"    pm.expect(resData).to.have.property(\"status\");",
+							"});",
+							"",
+							"pm.test(\"Verify message is student found\", function () {",
+							"    pm.expect(resData.message).to.be.eql(\"Students Found\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://qa.taltektc.com/api/students",
+					"protocol": "https",
+					"host": [
+						"qa",
+						"taltektc",
+						"com"
+					],
+					"path": [
+						"api",
+						"students"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "https://prod.taltektc.com/api/"
+		}
+	]
+}
